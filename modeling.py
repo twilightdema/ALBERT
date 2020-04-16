@@ -804,6 +804,9 @@ def dot_product_attention(q, k, v, bias, dropout_rate=0.0):
   Returns:
     Tensor with shape [..., length_q, depth_v].
   """
+  bias_shape = get_shape_list(bias)
+  tf.print("Bias: ", bias_shape, bias)
+
   logits = tf.matmul(q, k, transpose_b=True)  # [..., length_q, length_kv]
   logits = tf.multiply(logits, 1.0 / math.sqrt(float(get_shape_list(q)[-1])))
   if bias is not None:
@@ -816,8 +819,14 @@ def dot_product_attention(q, k, v, bias, dropout_rate=0.0):
       broadcast_ones = tf.ones([from_shape[0], 1, from_shape[2], from_shape[3],
                                 1], tf.float32)
 
+    broadcast_ones_shape = get_shape_list(broadcast_ones)
+    tf.print("Broadcast_Ones: ", broadcast_ones_shape, broadcast_ones)
+
     bias = tf.matmul(broadcast_ones,
                      tf.cast(bias, tf.float32), transpose_b=True)
+
+    bias_shape = get_shape_list(bias)
+    tf.print("Bias (After matmul broadcast): ", bias_shape, bias)
 
     # Since attention_mask is 1.0 for positions we want to attend and 0.0 for
     # masked positions, this operation will create a tensor which is 0.0 for
